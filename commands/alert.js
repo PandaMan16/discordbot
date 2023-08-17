@@ -1,13 +1,19 @@
 const { SlashCommandBuilder, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
-const { Commande_Channel } = require('../config.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
-		.setName('alert')
-		.setDescription('créé un message generel alert'),
-    async execute(interaction,client) {
+        .setName('alert')
+        .setDescription('Crée un message général d\'alerte')
+        .addStringOption(option => 
+            option.setName('option')
+                  .setDescription('Option pour l\'alerte')
+                  .setRequired(false)
+        ),
+    async execute(interaction, client) {
+        const optionValue = interaction.options.getString('option');
+
         const modal = new ModalBuilder()
-            .setTitle('Créé une alert')
+            .setTitle('Crée une alerte')
             .setCustomId('alertmodal')
             .setComponents(
                 new ActionRowBuilder().setComponents(
@@ -15,16 +21,30 @@ module.exports = {
                         .setLabel('Titre')
                         .setCustomId('title')
                         .setStyle(TextInputStyle.Short)
-                        .setPlaceholder("exemple: IMPORTANT")
+                        .setPlaceholder("Exemple: IMPORTANT")
                 ),
                 new ActionRowBuilder().setComponents(
                     new TextInputBuilder()
-                        .setLabel('Contenue')
+                        .setLabel('Contenu')
                         .setCustomId('content')
                         .setStyle(TextInputStyle.Paragraph)
-                        .setPlaceholder("")
-                ),
+                        .setPlaceholder("Entrez le contenu de l'alerte ici")
+                )
             );
+
+        // Si l'option est "retard", ajoutez un champ de date et d'heure
+        if (optionValue === 'retard') {
+            modal.addComponents(
+                new ActionRowBuilder().setComponents(
+                    new TextInputBuilder()
+                        .setLabel('Date et Heure')
+                        .setCustomId('datetime')
+                        .setStyle(TextInputStyle.Short)
+                        .setPlaceholder("JJ/MM/AAAA HH:MM")
+                )
+            );
+        }
+
         interaction.showModal(modal);
     }
-}
+};
